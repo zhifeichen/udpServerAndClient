@@ -1,0 +1,7 @@
+Release
+Debug
+ipch
+/udpClientTest.sdf
+/udpClientTest/Debug
+/udpClientTest/Release
+.vs
