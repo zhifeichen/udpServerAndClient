@@ -23,8 +23,9 @@ void print_hex(UINT8* data, int len, const char* type)
 	UINT8* p = data;
 	char* buf = malloc(len * 2 + 1);
 	char* pbuf = buf;
-	//p = p + len - 1;
-	for (int i = 0; i < len; i++, p++) {
+	int i = 0;
+
+	for (i = 0; i < len; i++, p++) {
 		*buf++ = hex[*p >> 4];
 		*buf++ = hex[*p & 0x0F];
 	}
@@ -47,6 +48,8 @@ int start_server(void* port)
 	int SenderAddrSize = sizeof(SenderAddr);
 	char RecvBuf[1024];
 	int BufLen = 1024;
+
+	struct sockaddr_in* addr;
 
 
 	ZeroMemory(&hints, sizeof(hints));
@@ -79,7 +82,7 @@ int start_server(void* port)
 		return 1;
 	}
 
-	struct sockaddr_in* addr = (struct sockaddr_in*)result->ai_addr;
+	addr = (struct sockaddr_in*)result->ai_addr;
 	printf("local udp server listening on: %s:%u\n", inet_ntoa(addr->sin_addr), ntohs(addr->sin_port));
 	freeaddrinfo(result);
 
