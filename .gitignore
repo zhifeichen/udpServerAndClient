@@ -5,3 +5,4 @@ ipch
 /udpClientTest/Debug
 /udpClientTest/Release
 .vs
+/udpClientTest.VC.opendb
