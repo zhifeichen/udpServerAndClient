@@ -53,7 +53,7 @@ int start_server(void* port)
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_protocol = IPPROTO_UDP;
-	hints.ai_flags = AI_PASSIVE;
+	hints.ai_flags = AI_PASSIVE; // fix: for wild card ip address.
 
 	// Resolve the server address and port
 	iResult = getaddrinfo(NULL, port, &hints, &result);
@@ -81,8 +81,8 @@ int start_server(void* port)
 
 	struct sockaddr_in* addr = (struct sockaddr_in*)result->ai_addr;
 	printf("local udp server listening on: %s:%u\n", inet_ntoa(addr->sin_addr), ntohs(addr->sin_port));
-	//printf("local udp server listening on: %s\n", port);
 	freeaddrinfo(result);
+
 	while (!quit && (iResult = recvfrom(ListenSocket,
 		RecvBuf, BufLen, 0, (SOCKADDR *)& SenderAddr, &SenderAddrSize)) != SOCKET_ERROR) {
 
