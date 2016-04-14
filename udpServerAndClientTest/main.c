@@ -3,6 +3,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include <process.h>
 
@@ -11,16 +12,18 @@
 SOCKET ListenSocket = INVALID_SOCKET;
 SOCKET ClientSocket = INVALID_SOCKET;
 
-const UINT8 requestRefPoint[] = { 0x5f, 0x05, 0x05, 0x5a };
-const UINT8 reportPosi[] = { 0x5F, 0x01, 0x00, 0x26, 0x03, 0xC8, 0x00, 0x26, 0x03, 0xC8, 0xE3, 0x5A };
-const UINT8 reportResult[] = { 0x5F, 0x04, 0x01, 0x05, 0x5A };
+const uint8_t requestRefPoint[] = { 0x5f, 0x05, 0x05, 0x5a };
+const uint8_t reportPosi[] = { 0x5F, 0x01, 0x00, 0x26, 0x03, 0xC8, 0x00, 0x26, 0x03, 0xC8, 0xE3, 0x5A };
+const uint8_t responseStartCruise[] = { 0x5F, 0x02, 0x00, 0x26, 0x03, 0xC8, 0x00, 0x26, 0x03, 0xC8, 0xE4, 0x5A };
+const uint8_t responseStopCruise[] = { 0x5F, 0x03, 0x01, 0x04, 0x5A };
+const uint8_t reportResult[] = { 0x5F, 0x04, 0x01, 0x05, 0x5A };
 
 volatile int quit = 0;
 
-void print_hex(UINT8* data, int len, const char* type) 
+void print_hex(uint8_t* data, int len, const char* type)
 {
-	const UINT8 hex[] = "0123456789ABCDEF";
-	UINT8* p = data;
+	const uint8_t hex[] = "0123456789ABCDEF";
+	uint8_t* p = data;
 	char* buf = malloc(len * 2 + 1);
 	char* pbuf = buf;
 	int i = 0;
@@ -37,6 +40,25 @@ void print_hex(UINT8* data, int len, const char* type)
 void print_usage(char* name)
 {
 	printf("usage: %s clientIP clientPort serverListenPort\n", name);
+}
+
+void do_response(uint8_t* req, int len)
+{
+	uint8_t type = req[1];
+	int result;
+	switch (type)
+	{
+	case 0x02:
+		result = send(ClientSocket, responseStartCruise, sizeof(responseStartCruise), 0);
+		print_hex(responseStartCruise, result, "response");
+		break;
+	case 0x03:
+		result = send(ClientSocket, responseStopCruise, sizeof(responseStopCruise), 0);
+		print_hex(responseStopCruise, result, "response");
+		break;
+	default:
+		break;
+	}
 }
 
 int start_server(void* port)
@@ -90,6 +112,7 @@ int start_server(void* port)
 		RecvBuf, BufLen, 0, (SOCKADDR *)& SenderAddr, &SenderAddrSize)) != SOCKET_ERROR) {
 
 		print_hex(RecvBuf, iResult, "received");
+		do_response(RecvBuf, iResult);
 	}
 
 	closesocket(ListenSocket);
