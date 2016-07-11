@@ -13,14 +13,14 @@ SOCKET ListenSocket = INVALID_SOCKET;
 SOCKET ClientSocket = INVALID_SOCKET;
 
 const uint8_t requestRefPoint[] = { 0x5f, 0x05, 0x05, 0x5a };
-const uint8_t reportPosi[] = { 0x5F, 0x01, 0x00, 0x26, 0x03, 0xC8, 0x00, 0x26, 0x03, 0xC8, 0xE3, 0x5A };
+const uint8_t reportPosi[] = { 0x5F, 0x01, 0x00, 0x26, 0x03, 0xC8, 0x00, 0x26, 0x03, 0xC9, 0xE4, 0x5A };
 const uint8_t responseStartCruise[] = { 0x5F, 0x02, 0x00, 0x26, 0x03, 0xC8, 0x00, 0x26, 0x03, 0xC8, 0xE4, 0x5A };
 const uint8_t responseStopCruise[] = { 0x5F, 0x03, 0x01, 0x04, 0x5A };
 const uint8_t reportResult[] = { 0x5F, 0x04, 0x01, 0x05, 0x5A };
 
 volatile int quit = 0;
 
-void print_hex(uint8_t* data, int len, const char* type)
+void print_hex(const uint8_t* data, const int len, const char* type)
 {
 	const uint8_t hex[] = "0123456789ABCDEF";
 	uint8_t* p = data;
@@ -48,6 +48,10 @@ void do_response(uint8_t* req, int len)
 	int result;
 	switch (type)
 	{
+	case 0x01:
+		result = send(ClientSocket, reportPosi, sizeof(reportPosi), 0);
+		print_hex(reportPosi, result, "response");
+		break;
 	case 0x02:
 		result = send(ClientSocket, responseStartCruise, sizeof(responseStartCruise), 0);
 		print_hex(responseStartCruise, result, "response");
